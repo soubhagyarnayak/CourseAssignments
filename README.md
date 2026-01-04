@@ -1,2 +1,2 @@
-# CourseAssignments
-Assignments of Courses taken by me
+# Course Assignments
+Assignments of courses taken by me
