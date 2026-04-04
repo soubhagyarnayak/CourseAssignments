@@ -1,80 +1,57 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
 public class Clustering {
     private static double clustering(int[] x, int[] y, int k) {
-        //write your code here
         int n = x.length;
 
-        List<Edge> edges = new ArrayList<>();
+        boolean[] visited = new boolean[n];
+        double[] dist = new double[n];
+        int[] parent = new int[n];
+
+        Arrays.fill(dist, Double.MAX_VALUE);
+        dist[0] = 0;
+
+        List<Double> mstEdges = new ArrayList<>();
+
         for (int i = 0; i < n; i++) {
-            for (int j = i + 1; j < n; j++) {
-                double w = Math.sqrt(Math.pow(x[i] - x[j], 2) + Math.pow(y[i] - y[j], 2));
-                edges.add(new Edge(i, j, w));
-            }
-        }
-        edges.sort((e1, e2) -> Double.compare(e1.weight, e2.weight));
-        UnionFind uf = new UnionFind(n);
-        int numClusters = n;
-        for (Edge edge : edges) {
-            if (uf.find(edge.u) != uf.find(edge.v)) {   
-                if (numClusters == k) {
-                    return edge.weight;
+            int u = -1;
+
+            // find min dist vertex
+            for (int j = 0; j < n; j++) {
+                if (!visited[j] && (u == -1 || dist[j] < dist[u])) {
+                    u = j;
                 }
-                uf.union(edge.u, edge.v);
-                numClusters--;
             }
-        }
-        return -1.;
-    }
 
-    public static class UnionFind {
-        private int[] parent;
-        private int[] rank;
+            visited[u] = true;
 
-        public UnionFind(int n) {
-            parent = new int[n];
-            rank = new int[n];
-            for (int i = 0; i < n; i++) {
-                parent[i] = i;
-                rank[i] = 0;
+            if (i > 0) {
+                mstEdges.add(Math.sqrt(dist[u])); // actual edge weight
             }
-        }
 
-        public int find(int u) {
-            if (parent[u] != u) {
-                parent[u] = find(parent[u]);
-            }
-            return parent[u];
-        }
+            for (int v = 0; v < n; v++) {
+                if (!visited[v]) {
+                    double dx = x[u] - x[v];
+                    double dy = y[u] - y[v];
+                    double w = dx * dx + dy * dy;
 
-        public void union(int u, int v) {
-            int rootU = find(u);
-            int rootV = find(v);
-            if (rootU != rootV) {
-                if (rank[rootU] > rank[rootV]) {
-                    parent[rootV] = rootU;
-                } else if (rank[rootU] < rank[rootV]) {
-                    parent[rootU] = rootV;
-                } else {
-                    parent[rootV] = rootU;
-                    rank[rootU]++;
+                    if (w < dist[v]) {
+                        dist[v] = w;
+                        parent[v] = u;
+                    }
                 }
             }
         }
-    }
 
-    public static class Edge {
-        public int u;
-        public int v;
-        public double weight;
+        // sort MST edges
+        Collections.sort(mstEdges);
 
-        public Edge(int u, int v, double weight) {
-            this.u = u;
-            this.v = v;
-            this.weight = weight;
-        }
+        // remove k-1 largest edges
+        return mstEdges.get(mstEdges.size() - (k - 1));
     }
 
     public static void main(String[] args) {

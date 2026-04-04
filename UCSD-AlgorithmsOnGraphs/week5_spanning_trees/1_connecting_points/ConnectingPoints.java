@@ -1,4 +1,3 @@
-import java.util.PriorityQueue;
 import java.util.Scanner;
 
 public class ConnectingPoints {
@@ -12,43 +11,28 @@ public class ConnectingPoints {
             dist[i] = Double.MAX_VALUE;
         }
         dist[0] = 0.0;
-        PriorityQueue<PQNode> pq = new PriorityQueue<>();
-        pq.add(new PQNode(0.0, 0));
 
-        while (!pq.isEmpty()) {
-            PQNode node = pq.poll();
-            int u = node.vertex;
-            if (visited[u]) {
-                continue;
+        for (int i = 0; i < n; i++) {
+            int u = -1;
+            for (int j = 0; j < n; j++) {
+                if (!visited[j] && (u == -1 || dist[j] < dist[u])) {
+                    u = j;
+                }
             }
             visited[u] = true;
-            result += node.dist;
+            result += Math.sqrt(dist[u]); 
             for (int v = 0; v < n; v++) {
                 if (!visited[v]) {
-                    double w = Math.sqrt(Math.pow(x[u] - x[v], 2) + Math.pow(y[u] - y[v], 2));
+                    int dx = x[u] - x[v];
+                    int dy = y[u] - y[v]; 
+                    double w = dx * dx + dy * dy;
                     if (w < dist[v]) {
                         dist[v] = w;
-                        pq.add(new PQNode(w, v));
                     }
                 }
             }
-        }  
+        }
         return result;
-    }
-
-    public static class PQNode implements Comparable<PQNode> {
-        public double dist;
-        public int vertex;
-
-        public PQNode(double dist, int vertex) {
-            this.dist = dist;
-            this.vertex = vertex;
-        }
-
-        @Override
-        public int compareTo(PQNode other) {
-            return Double.compare(this.dist, other.dist);
-        }
     }
 
     public static void main(String[] args) {
